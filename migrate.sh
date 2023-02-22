@@ -1,7 +1,9 @@
 #!/bin/sh
 
+prior_zed_version="v1.5.0"
+
 cd "$(dirname "$0")"
-prior_zed="$(pwd)/zed-v1.5.0"
+prior_zed="$(pwd)/zed-$prior_zed_version"
 
 case $(uname -s) in
     Darwin )
@@ -59,9 +61,7 @@ for pool_ksuid in $ksuid_glob; do
     # Look for [0-9]*.zng so snap.zng is excluded
     branch_count=$(zq -f text 'yield entry.name | sort | uniq | count()' $pool_ksuid/branches/[0-9]*.zng)
     if [ "$branch_count" != 1 ]; then
-        # Not attempting to migrate pools with multiple branches yet
-        echo "skipping '$pool_name' ($pool_ksuid): found multiple ($branch_count) branches"
-        continue
+        echo "warning: found $branch_count branches in '$pool_name' ($pool_ksuid) but only migrating 'main'"
     fi
 
     if zed -lake "$dst_dir" ls "$pool_name" >/dev/null 2>&1; then
@@ -71,7 +71,7 @@ for pool_ksuid in $ksuid_glob; do
 
     echo "migrating pool '$pool_name' ($pool_ksuid)"
     prior_zng=$(mktemp)
-    $prior_zed -lake "$src_dir" -use "$pool_name" query '*' > "$prior_zng"
+    $prior_zed -lake "$src_dir" -use "$pool_name"@main query '*' > "$prior_zng"
     zed -lake "$dst_dir" create -q -orderby "$pool_order" "$pool_name"
     zed -lake "$dst_dir" load -q -use "$pool_name" "$prior_zng"
     new_zng=$(mktemp)
