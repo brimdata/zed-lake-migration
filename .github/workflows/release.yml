@@ -1,0 +1,22 @@
+name: release assets
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "release/**"
+
+jobs:
+  release:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Assemble artifacts
+        run: |
+          for platform in darwin linux windows; do
+            for arch in amd arm; do
+              echo $platform $arch
+            done
+          done
