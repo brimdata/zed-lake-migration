@@ -1,10 +1,11 @@
-name: release assets
+name: Create Release
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - "release/**"
+    inputs:
+      release_tag:
+        required: true
+        type: string
 
 jobs:
   release:
@@ -16,7 +17,38 @@ jobs:
       - name: Assemble artifacts
         run: |
           for platform in darwin linux windows; do
-            for arch in amd arm; do
-              echo $platform $arch
+            for arch in amd64 arm64; do
+              combo="$platform-$arch"
+              src_zed_version=$(cat src_zed_version)
+              if [ $platform == "windows" ]; then
+                pkg_suffix="zip"
+                pkg_unpacker="unzip"
+                dest_dir_flag="-d"
+                pkg_packer="zip -r"
+                exec_suffix=".exe"
+              else
+                pkg_suffix="tar.gz"
+                pkg_unpacker="tar xzvf"
+                dest_dir_flag="-C"
+                pkg_packer="tar czvf"
+                exec_suffix=""
+              fi
+              zed_pkg=zed-${src_zed_version}.${combo}.${pkg_suffix}
+              wget -q https://github.com/brimdata/zed/releases/download/${src_zed_version}/$zed_pkg
+              mkdir $combo
+              $pkg_unpacker $zed_pkg $dest_dir_flag $combo zed${exec_suffix}
+              mv $combo/zed${exec_suffix} $combo/zed-${src_zed_version}${exec_suffix}
+              cp migrate.sh src_zed_version $combo
+              mv $combo zed-lake-migration
+              artifact_pkg=zed-lake-migration-${{ inputs.release_tag }}-${combo}.${pkg_suffix}
+              $pkg_packer $artifact_pkg zed-lake-migration
+              rm -rf zed-lake-migration
             done
           done
+          ls -lR
+
+      - name: Create release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "zed-lake-migration-*"
+          tag: ${{ inputs.release_tag }}
