@@ -1,27 +1,32 @@
 #!/bin/sh
 
-prior_zed_version="v1.5.0"
-
 cd "$(dirname "$0")"
-prior_zed="$(pwd)/zed-$prior_zed_version"
 
 case $(uname -s) in
     Darwin )
         PATH=/Applications/Zui.app/Contents/Resources/app.asar.unpacked/zdeps:$PATH
         src_dir="$HOME/Library/Application Support/Brim/lake"
         dst_dir="$HOME/Library/Application Support/Zui/lake"
+        prior_zed="$(pwd)/zed-$(cat src_zed_version)"
         ;;
     Linux )
         PATH=/opt/Zui/resources/app.asar.unpacked/zdeps:$PATH
         src_dir=$HOME/.config/Brim/lake
         dst_dir=$HOME/.config/Zui/lake
+        prior_zed="$(pwd)/zed-$(cat src_zed_version)"
         ;;
     * ) # Windows
         PATH=$LOCALAPPDATA/Programs/Zui/resources/app.asar.unpacked/zdeps:$PATH
         src_dir=$APPDATA/Brim/lake
         dst_dir=$APPDATA/Zui/lake
+        prior_zed="$(pwd)/zed-$(cat src_zed_version).exe"
         ;;
 esac
+
+if [ ! -x "$prior_zed" ]; then
+    echo "fatal error: $prior_zed executable not found" >&2
+    exit 1
+fi
 
 if [ $# -gt 2 ] || [ $# -eq 1 ]; then
      echo "usage: $0 [SRC_DATA_DIR] [DST_DATA_DIR]" >&2
