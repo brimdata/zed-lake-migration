@@ -5,19 +5,19 @@ cd "$(dirname "$0")"
 case $(uname -s) in
     Darwin )
         PATH="/Applications/Zui - Insiders.app/Contents/Resources/app.asar.unpacked/zdeps:$PATH"
-        src_dir="$HOME/Library/Application Support/Brim/lake"
+        src_dir="$HOME/Library/Application Support/Zui - Insiders/lake-v1"
         dst_dir="$HOME/Library/Application Support/Zui - Insiders/lake"
         prior_zed="$(pwd)/zed-$(cat src_zed_version)"
         ;;
     Linux )
         PATH="/opt/Zui - Insiders/resources/app.asar.unpacked/zdeps:$PATH"
-        src_dir=$HOME/.config/Brim/lake
+        src_dir="$HOME/.config/Zui - Insiders/lake-v1"
         dst_dir="$HOME/.config/Zui - Insiders/lake"
         prior_zed="$(pwd)/zed-$(cat src_zed_version)"
         ;;
     * ) # Windows
         PATH="$LOCALAPPDATA/Programs/Zui - Insiders/resources/app.asar.unpacked/zdeps:$PATH"
-        src_dir=$APPDATA/Brim/lake
+        src_dir="$APPDATA/Zui - Insiders/lake-v1"
         dst_dir="$APPDATA/Zui - Insiders/lake"
         prior_zed="$(pwd)/zed-$(cat src_zed_version).exe"
         ;;
