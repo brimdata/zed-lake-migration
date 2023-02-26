@@ -4,21 +4,21 @@ cd "$(dirname "$0")"
 
 case $(uname -s) in
     Darwin )
-        PATH=/Applications/Zui.app/Contents/Resources/app.asar.unpacked/zdeps:$PATH
+        PATH="/Applications/Zui.app/Contents/Resources/app.asar.unpacked/zdeps:$PATH"
         src_dir="$HOME/Library/Application Support/Brim/lake"
         dst_dir="$HOME/Library/Application Support/Zui/lake"
         prior_zed="$(pwd)/zed-$(cat src_zed_version)"
         ;;
     Linux )
-        PATH=/opt/Zui/resources/app.asar.unpacked/zdeps:$PATH
-        src_dir=$HOME/.config/Brim/lake
-        dst_dir=$HOME/.config/Zui/lake
+        PATH="/opt/Zui/resources/app.asar.unpacked/zdeps:$PATH"
+        src_dir="$HOME/.config/Brim/lake"
+        dst_dir="$HOME/.config/Zui/lake"
         prior_zed="$(pwd)/zed-$(cat src_zed_version)"
         ;;
     * ) # Windows
-        PATH=$LOCALAPPDATA/Programs/Zui/resources/app.asar.unpacked/zdeps:$PATH
-        src_dir=$APPDATA/Brim/lake
-        dst_dir=$APPDATA/Zui/lake
+        PATH="$LOCALAPPDATA/Programs/Zui/resources/app.asar.unpacked/zdeps:$PATH"
+        src_dir="$APPDATA/Brim/lake"
+        dst_dir="$APPDATA/Zui/lake"
         prior_zed="$(pwd)/zed-$(cat src_zed_version).exe"
         ;;
 esac
