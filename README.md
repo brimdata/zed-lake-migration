@@ -3,12 +3,12 @@
 As the [Zed](https://zed.brimdata.io/) system is young and evolving, there's
 the potential that new functionality may require changes to the
 [lake storage format](https://zed.brimdata.io/docs/next/lake/format) that are
-not backward compatible. While we exepct these chanegs to be rare, such a
+not backward compatible. While we expect these changes to be rare, such a
 change recently occurred such that Zed lakes created with
 [Zed v1.5.0](https://github.com/brimdata/zed/releases/tag/v1.5.0) and older
-will not be readable by [Zed v1.6.0](https://github.com/brimdata/zed/releases/tag/v1.6.0)
-and newer. This change will also affect tools such as [Zui](https://zui.brimdata.io/)
-(formerly known as Brim) that use Zed lakes.
+("v1 format") will not be readable by [Zed v1.6.0](https://github.com/brimdata/zed/releases/tag/v1.6.0)
+and newer ("v2 format"). This change will also affect tools that use Zed lakes
+such as the [Zui](https://zui.brimdata.io/) app (formerly known as Brim).
 
 To help users make the transition, the tools in this repository can be used to
 migrate lakes to the newer format.
@@ -17,14 +17,17 @@ migrate lakes to the newer format.
 
 To keep the migration tools simple, there are some limitations.
 
-1. Only the `main` branch of each pool is migrated.
-2. The contents of the migrated pool are loaded as a single
+1. Only the `main` [branch](https://zed.brimdata.io/docs/commands/zed#22-branch)
+of each pool is migrated.
+
+2. The contents of the migrated pool are loaded in "v2 format"as a single
 [commit](https://zed.brimdata.io/docs/commands/zed#141-commit-objects). The
-commit history is therefore not preserved, so [time travel](https://zed.brimdata.io/docs/commands/zed#15-time-travel)
+"v1 format" commit history is therefore not preserved, so
+[time travel](https://zed.brimdata.io/docs/commands/zed#15-time-travel)
 will not be possible to pre-migration commits.
 
-We expect most users are not yet dependent on the features affetced by these
-limitations. However, your environment is severely impacted by these
+We expect most users are not yet dependent on the features affected by these
+limitations. However, if your environment is severely impacted by these
 limitations, come talk to us on the
 [Brim community Slack](https://www.brimdata.io/join-slack/).
 
@@ -36,8 +39,8 @@ for your operating system. The migration script in the kit is preconfigured
 to work out-of-the-box to migrate the Zed lakes from a
 [Brim v0.31.0](https://github.com/brimdata/brim/releases/tag/v0.31.0)
 install to a [Zui v1.0.0](https://github.com/brimdata/zui/releases/tag/v1.0.0)
-install. If this is your use case, simply run the script as shown below for
-an example with two pools.
+install. If this is your use case, simply run the script as shown below. In
+this example, two pools are migrated on a macOS system.
 
 ```
 $ sh migrate.sh 
@@ -46,12 +49,20 @@ migrating pool 'wrccdc.pcap' (2MCssyxdqCxwx2pvIabmQoNF21R)
 migrating pool 'example_pool' (2MCsuDhqnoE2QB6p4reHWJdaI9z)
 ```
 
+The migrated pools will be shown the next time you open Zui. If your Zui app is
+already open, click **View > Reload** from the pull-down menu to see the
+list of migrated pools. Because Zui's [user data](https://zui.brimdata.io/docs/support/Filesystem-Paths#user-data)
+directory is separate from Brim's, the "v1 format"  storage left in the Brim
+app's user data path will no longer be accessed and can be backed up and/or
+deleted.
+
 See the sections below if you're migrating between [Zui Insiders](#zui-insiders)
-releases or if you're managing your pools directly with the
+releases or if you're managing your lake directly with the
 [Zed CLI tools](#zed-cli-tools).
 
-> **Note:** The migration script must be run in a Windows `sh` variant like
-> `BusyBox`, `Cygwin`, or `MSYS2`. If you do not have any of these already set
+> **Note:** On Windows the migration script must be run in `sh` variants like
+> [BusyBox](https://busybox.net/), [Cygwin](https://www.cygwin.com/), or
+> [MSYS2](https://www.msys2.org/). If you do not have any of these already set
 > up, we recommend downloading
 > [busybox.exe](https://frippery.org/files/busybox/busybox.exe)
 > as it seems to be the easiest. Once downloaded, start the shell. See the
@@ -67,44 +78,77 @@ releases or if you're managing your pools directly with the
 ## How It Works
 
 For ease of use, the migration kit includes a
-[`zed` v1.5.0](https://github.com/brimdata/zed/releases/tag/v1.5.0) binary
-that can read the old lake format. That `zed` is used to do a bulk dump of
-the older lake's contents to a single [ZNG](https://zed.brimdata.io/docs/formats/zng)
-file via [`zed query`](https://zed.brimdata.io/docs/commands/zed#211-query).
+[Zed v1.5.0](https://github.com/brimdata/zed/releases/tag/v1.5.0) binary
+that can read the "v1 format". The migration script uses this binary to perform
+a bulk dump of the older lake's contents to a single, temporary
+[ZNG](https://zed.brimdata.io/docs/formats/zng) file via
+[`zed query`](https://zed.brimdata.io/docs/commands/zed#211-query).
 A new `zed` binary (such as the one bundled with the Zui app) is then used to
 [`zed load`](https://zed.brimdata.io/docs/commands/zed#28-load) the ZNG into
-a new lake (such as the one behind Zui). Finally, a ZNG dump is performed of
-the newly-loaded lake and the two ZNG dumps are compared to confirm they are
-byte-for-byte equivalent. The script will provide error output if migration
-fails or the ZNG dump comparison finds any differences. If your Zui app is
-already open, click **View > Reload** from the pull-down menu to see the
-list of migrated pools.
+a new "v2 format" lake (such as the one behind Zui). Finally, a ZNG dump is
+performed of the newly-loaded lake and the two ZNG dumps are compared to
+confirm they are byte-for-byte equivalent. If the lakes are confirmed to be
+equivalent, the temporary dump ZNG files are removed. The script will provide
+error output if migration fails or the ZNG dump comparison finds any
+differences.
 
 ## Zui Insiders
 
-The transition from Brim/Zui is made simpler by the fact that Brim and Zui
-store their Zed lakes in separate
-[user data](https://zui.brimdata.io/docs/support/Filesystem-Paths#user-data)
-directories. By comparison, when upgrading Zui Insiders to a release that
-includes the new Zed lake storage format, the following steps should be
-followed to handle the mirgation within a single user data directory.
+[Zui Insiders v0.30.1-196](https://github.com/brimdata/zui-insiders/releases/tag/v0.30.1-196)
+was the last release with "v1 format" lake storage. Therefore when
+Zui Insiders is updated to a newer release, the Zed service will attempt and
+fail to read the lake in the older format and not successfully start, resulting
+in a failure like the one shown below.
 
+![Zed service failure](zed-serve-failure.png)
 
-follo
-are required because
-only a single 
+To migrate the lake with Zui Insiders, a special migration kit release
+[v0.0.1-for-zui-insiders](https://github.com/brimdata/zed-lake-migration/releases/tag/v0.0.1-for-zui-insiders)
+has been created with specific [filesystem paths](https://zui.brimdata.io/docs/support/Filesystem-Paths)
+for Zui Insiders. After downloading the Zui Insiders migration kit for your OS,
+follow the steps below.
 
+1. Quit the Zui insiders app.
 
-The migration script in the kit is preconfigured
-to work out-of-the-box to migrate the Zed lakes from a
-[Brim v0.31.0](https://github.com/brimdata/brim/releases/tag/v0.31.0)
-install to a [Zui v1.0.0](https://github.com/brimdata/zui/releases/tag/v1.0.0)
-install. If this is your use case, simply run the script as shown below for 
-an example with two pools. 
+2. Rename the lake directory by appending `-v1` to the end of its name. The
+table below shows the final directory name for each OS.
 
+   |**OS Platform**|**Location**                                                |
+   |---------------|------------------------------------------------------------|
+   | **Windows**   | `%APPDATA%\Zui - Insiders\lake-v1`                         |
+   | **macOS**     | `$HOME/Library/Application Support/Zui - Insiders/lake-v1` |
+   | **Linux**     | `$HOME/.config/Zui -Insiders/lake-v1`                      |
 
-## Zui Insiders
+3. Run the `migrate.sh` script as shown in the [Usage](#usage) section above.
 
-On raw Zed installs
+Once migration is complete, the `-v1` directory will no longer be accessed and
+can be backed up and/or deleted.
 
-Come talk to use on Slack
+## Zed CLI Tools
+
+By default the kit migrates between well-known
+[filesystem paths](https://zui.brimdata.io/docs/support/Filesystem-Paths)
+used for lake storage by the Brim, Zui, and Zui Insiders apps. However the
+migration script also accepts parameters for the source/destination lake
+directories that can be used instead of the default paths. In addition
+to providing these parameters, you'll need to ensure that current [`zed`](https://zed.brimdata.io/docs/commands/zed) and
+[`zq`](https://zed.brimdata.io/docs/commands/zq) binaries (e.g., `v1.6` or newer)
+are in your `$PATH` so the script can create your new lake in "v2 format".
+
+The following example run shows two pools in a "v1 format" lake being
+successfully migrated to a "v2 format" lake.
+
+```
+$ sh migrate.sh $HOME/oldlake $HOME/newlake
+migrating lake at '/Users/phil/oldlake' to '/Users/phil/newlake'
+lake created: /Users/phil/newlake
+migrating pool 'pool_one' (2MI4fF2M7c1a6MzgaY7j1C0dN1I)
+migrating pool 'pool_two' (2MI4fXsl2tCfYAzaaLrA4MrxgfM)
+```
+
+## Having a problem?
+
+If you have problems with data migration feel free to
+[open an issue](https://github.com/brimdata/zed-lake-migration/issues/new) or
+come talk to us on the
+[Brim community Slack](https://www.brimdata.io/join-slack/).
