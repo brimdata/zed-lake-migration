@@ -105,10 +105,10 @@ in a failure like the one shown below.
 To migrate the lake with Zui Insiders, a special migration kit release
 [v0.0.1-for-zui-insiders](https://github.com/brimdata/zed-lake-migration/releases/tag/v0.0.1-for-zui-insiders)
 has been created with specific [filesystem paths](https://zui.brimdata.io/docs/support/Filesystem-Paths)
-for Zui Insiders. After downloading the Zui Insiders migration kit for your OS,
-follow the steps below.
+for Zui Insiders. After downloading and unpacking the Zui Insiders migration
+kit for your OS, follow the steps below.
 
-1. Quit the Zui insiders app.
+1. Quit the Zui Insiders app.
 
 2. Rename the lake directory by appending `-v1` to the end of its name. The
 table below shows the final directory name for each OS.
