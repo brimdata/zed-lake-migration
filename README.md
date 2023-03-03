@@ -7,7 +7,7 @@ not backward compatible. While we expect these changes to be rare, such a
 change recently occurred such that Zed lakes created with
 [Zed v1.5.0](https://github.com/brimdata/zed/releases/tag/v1.5.0) and older
 ("v1 format") will not be readable by [Zed v1.6.0](https://github.com/brimdata/zed/releases/tag/v1.6.0)
-and newer ("v2 format"). This change will also affect tools that use Zed lakes
+and newer ("v3 format"). This change will also affect tools that use Zed lakes
 such as the [Zui](https://zui.brimdata.io/) app (formerly known as Brim).
 
 To help users make the transition, the tools in this repository can be used to
@@ -20,7 +20,7 @@ To keep the migration tools simple, there are some limitations.
 1. Only the `main` [branch](https://zed.brimdata.io/docs/commands/zed#22-branch)
 of each pool is migrated.
 
-2. The contents of the migrated pool are loaded in "v2 format"as a single
+2. The contents of the migrated pool are loaded in "v3 format"as a single
 [commit](https://zed.brimdata.io/docs/commands/zed#141-commit-objects). The
 "v1 format" commit history is therefore not preserved, so
 [time travel](https://zed.brimdata.io/docs/commands/zed#15-time-travel)
@@ -85,7 +85,7 @@ a bulk dump of the older lake's contents to a single, temporary
 [`zed query`](https://zed.brimdata.io/docs/commands/zed#211-query).
 A new `zed` binary (such as the one bundled with the Zui app) is then used to
 [`zed load`](https://zed.brimdata.io/docs/commands/zed#28-load) the ZNG into
-a new "v2 format" lake (such as the one behind Zui). Finally, a ZNG dump is
+a new "v3 format" lake (such as the one behind Zui). Finally, a ZNG dump is
 performed of the newly-loaded lake and the two ZNG dumps are compared to
 confirm they are byte-for-byte equivalent. If the lakes are confirmed to be
 equivalent, the temporary dump ZNG files are removed. The script will provide
@@ -133,10 +133,10 @@ migration script also accepts parameters for the source/destination lake
 directories that can be used instead of the default paths. In addition
 to providing these parameters, you'll need to ensure that current [`zed`](https://zed.brimdata.io/docs/commands/zed) and
 [`zq`](https://zed.brimdata.io/docs/commands/zq) binaries (e.g., `v1.6` or newer)
-are in your `$PATH` so the script can create your new lake in "v2 format".
+are in your `$PATH` so the script can create your new lake in "v3 format".
 
 The following example run shows two pools in a "v1 format" lake being
-successfully migrated to a "v2 format" lake.
+successfully migrated to a "v3 format" lake.
 
 ```
 $ sh migrate.sh $HOME/oldlake $HOME/newlake
