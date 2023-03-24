@@ -64,7 +64,7 @@ for pool_ksuid in $ksuid_glob; do
     pool_order=$(zq -f text "entry.id==ksuid('$pool_ksuid') | head 1 | yield join(entry.layout.keys[0], '.') + ':' + entry.layout.order" $pools_zngs)
 
     # Look for [0-9]*.zng so snap.zng is excluded
-    branch_count=$(zq -f text 'yield entry.name | sort | uniq | count()' $pool_ksuid/branches/[0-9]*.zng)
+    branch_count=$(zq -z 'yield entry.name | sort' $pool_ksuid/branches/[0-9]*.zng | zq -f text 'uniq | count()' -)
     if [ "$branch_count" != 1 ]; then
         echo "warning: found $branch_count branches in '$pool_name' ($pool_ksuid) but only migrating 'main'"
     fi
@@ -78,6 +78,13 @@ for pool_ksuid in $ksuid_glob; do
     prior_zng=$(mktemp)
     $prior_zed -lake "$src_dir" -use "$pool_name"@main query '*' > "$prior_zng"
     zed -lake "$dst_dir" create -q -orderby "$pool_order" "$pool_name"
+
+    if ! [ -s "$prior_zng" ]; then
+        echo "$pool_name is empty: no data to migrate"
+        rm -f "$prior_zng"
+        continue
+    fi
+
     zed -lake "$dst_dir" load -q -use "$pool_name" "$prior_zng"
     new_zng=$(mktemp)
     zed -lake "$dst_dir" -use "$pool_name" query '*' > "$new_zng"
