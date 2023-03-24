@@ -79,17 +79,19 @@ for pool_ksuid in $ksuid_glob; do
     $prior_zed -lake "$src_dir" -use "$pool_name"@main query '*' > "$prior_zng"
     zed -lake "$dst_dir" create -q -orderby "$pool_order" "$pool_name"
 
-    if [ -s "$prior_zng" ]; then
-        zed -lake "$dst_dir" load -q -use "$pool_name" "$prior_zng"
-        new_zng=$(mktemp)
-        zed -lake "$dst_dir" -use "$pool_name" query '*' > "$new_zng"
-        if ! cmp -s "$prior_zng" "$new_zng"; then
-            echo "error: contents of migrated pool '$pool_name' differ from original"
-            echo "pool dump before/after: $prior_zng $new_zng"
-        else
-            rm -f "$prior_zng" "$new_zng"
-        fi
-    else
+    if ! [ -s "$prior_zng" ]; then
         echo "$pool_name is empty: no data to migrate"
+        rm -f "$prior_zng"
+        continue
+    fi
+
+    zed -lake "$dst_dir" load -q -use "$pool_name" "$prior_zng"
+    new_zng=$(mktemp)
+    zed -lake "$dst_dir" -use "$pool_name" query '*' > "$new_zng"
+    if ! cmp -s "$prior_zng" "$new_zng"; then
+        echo "error: contents of migrated pool '$pool_name' differ from original"
+        echo "pool dump before/after: $prior_zng $new_zng"
+    else
+        rm -f "$prior_zng" "$new_zng"
     fi
 done
