@@ -26,6 +26,12 @@ of each pool is migrated.
 [time travel](https://zed.brimdata.io/docs/commands/zed#15-time-travel)
 will not be possible to pre-migration commits.
 
+3. If you have a very large number of pools to migrate, the script may fail
+with a `too many open files` error. This can be addressed by increasing the
+system's hard limit on the number of file descriptors. Many references are
+available that advise how this may be done, such as
+[this article](https://docs.oracle.com/cd/E93962_01/bigData.Doc/install_onPrem/src/tins_postinstall_file_descriptors.html).
+
 We expect most users are not yet dependent on the features affected by these
 limitations. However, if your environment is severely impacted by these
 limitations, come talk to us on the
