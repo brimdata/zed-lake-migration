@@ -58,13 +58,13 @@ fi
 
 ksuid_glob='???????????????????????????'
 for pool_ksuid in $ksuid_glob; do
-    pool_name=$(zq -f text "entry.id==ksuid('$pool_ksuid') | head 1 | yield entry.name" $pools_zngs)
+    pool_name=$(zq -i zng -f text "entry.id==ksuid('$pool_ksuid') | head 1 | yield entry.name" $pools_zngs)
 
     # join() is needed to deal with nested pool keys, e.g., kafka.offset
-    pool_order=$(zq -f text "entry.id==ksuid('$pool_ksuid') | head 1 | yield join(entry.layout.keys[0], '.') + ':' + entry.layout.order" $pools_zngs)
+    pool_order=$(zq -i zng -f text "entry.id==ksuid('$pool_ksuid') | head 1 | yield join(entry.layout.keys[0], '.') + ':' + entry.layout.order" $pools_zngs)
 
     # Look for [0-9]*.zng so snap.zng is excluded
-    branch_count=$(zq -z 'yield entry.name | sort' $pool_ksuid/branches/[0-9]*.zng | zq -f text 'uniq | count()' -)
+    branch_count=$(zq -i zng -z 'yield entry.name | sort' $pool_ksuid/branches/[0-9]*.zng | zq -i zson -f text 'uniq | count()' -)
     if [ "$branch_count" != 1 ]; then
         echo "warning: found $branch_count branches in '$pool_name' ($pool_ksuid) but only migrating 'main'"
     fi
