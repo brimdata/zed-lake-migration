@@ -64,7 +64,7 @@ for pool_ksuid in $ksuid_glob; do
     pool_order=$(zq -i zng -f text "entry.id==ksuid('$pool_ksuid') | head 1 | yield join(entry.layout.keys[0], '.') + ':' + entry.layout.order" $pools_zngs)
 
     # Look for [0-9]*.zng so snap.zng is excluded
-    branch_count=$(zq -i zng -z 'yield entry.name | sort' $pool_ksuid/branches/[0-9]*.zng | zq -i zson -f text 'uniq | count()' -)
+    branch_count=$(find $pool_ksuid/branches -name '[0-9]*.zng' | xargs cat | zq -i zng -f text 'by entry.name | count()' -)
     if [ "$branch_count" != 1 ]; then
         echo "warning: found $branch_count branches in '$pool_name' ($pool_ksuid) but only migrating 'main'"
     fi
