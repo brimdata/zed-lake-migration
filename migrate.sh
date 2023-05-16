@@ -85,7 +85,7 @@ for pool_ksuid in $ksuid_glob; do
         continue
     fi
 
-    zed -lake "$dst_dir" load -q -use "$pool_name" "$prior_zng"
+    zed -lake "$dst_dir" load -i zng -q -use "$pool_name" "$prior_zng"
     new_zng=$(mktemp)
     zed -lake "$dst_dir" -use "$pool_name" query '*' > "$new_zng"
     if ! cmp -s "$prior_zng" "$new_zng"; then
